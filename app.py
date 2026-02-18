@@ -1,10 +1,7 @@
-from flask import Flask, request, current_app
+from flask import Flask, request, jsonify, current_app
 
 app = Flask(__name__)
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
 
 @app.route("/")
 def route1():
@@ -16,7 +13,7 @@ def route2():
 
 @app.route("/greet/<name>")
 def route3(name):
-    return  f"Hello,{name} ! Welcome to Flask."
+    return  f"'<h1>Hello, %s!</h1>' % name"
 @app.route("/calculate")
 def calculate():
     operation = request.args.get('operation')
@@ -27,16 +24,24 @@ def calculate():
         return "Missing parameter"
     num1 = float(num1)
     num2 = float(num2)
-    if operation == "add":
-        result = num1 + num2
-    elif operation == "subtract":
-        result = num1 - num2
-    elif operation == "multiply":
-        result = num1 * num2
-    elif operation == "divide":
-        result = num1 / num2
+    try:
+        if operation == "add":
+            result = num1 + num2
+        elif operation == "subtract":
+            result = num1 - num2
+        elif operation == "multiply":
+            result = num1 * num2
+        elif operation == "divide":
+            result = num1 / num2
+        else:
+            return "Invalid operation"
+        return {"Result" : result, "Operation" : operation}
+    except Exception as e:
+    # Log the exception and return an error response
+        print(f"Error occurred: {e}")
+        return {"error": "An error occurred during calculation"}
 
-    return {"Result" : result, "Operation" : operation}
+
 @app.route("/echo", methods = ["POST"])
 def route5():
     response = request.get_json()
@@ -48,3 +53,14 @@ def route6(code):
     return message, code
 if __name__ == '__main__':
     app.run(debug=True)
+
+@app.route('/debug/routes')
+def show_routes():
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods),
+            'path': str(rule)
+        })
+    return jsonify(routes)
