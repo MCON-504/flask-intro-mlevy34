@@ -7,7 +7,7 @@ print(f"Status Code: {response.status_code}")
 print(f"Content: {response.text}")
 
 response = requests.get(f"{base_url}/about")
-data = response.text
+data = response.json()
 for key, value in data.items():
     print(f"{key} : {value}")
 name = "Michelle"
@@ -19,21 +19,21 @@ else:
     print("Response doesn't contain the correct name")
 
 
-def test_calc_function(response):
-    global response
-    if requests.args.get('num2') == 0 and requests.args.get('operation') == 'divide':
-        print("Division by zero error")
-    else:
-        response = response.json()
-        print(f"Response:{response}")
 
 response = requests.get(f"{base_url}/calculate?num1=10&num2=5&operation=add")
-test_calc_function(response)
+response_data = response.json()
+if response_data["Status"] == "success":
+    print("Verification complete!")
+if response_data["Status"] == "error":
+    print("Verification incomplete!")
+
+
 response = requests.get(f"{base_url}/calculate?num1=70&num2=10&operation=multiply")
-test_calc_function(response)
+response_data = response.json()
+print(response_data["Result"])
 
 
-response = requests.get_json(f"{base_url}/echo")
+response = requests.get(f"{base_url}/echo")
 data = response.json()
 if "echoed" in data and True in data.values():
     print("Verification was a success!")
@@ -43,11 +43,11 @@ else:
 
 code = 200
 response = requests.get(f"{base_url}/status/{code}")
-data = response.json()
+data = response.text
 print(f"Response: {data.text} Status code: {code}")
 code = 404
 response = requests.get(f"{base_url}/status/{code}")
-data = response.json()
+data = response.text
 print(f"Response: {data.text} Status code: {code}")
 
 

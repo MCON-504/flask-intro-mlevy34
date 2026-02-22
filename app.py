@@ -2,6 +2,17 @@ from flask import Flask, request, jsonify, current_app
 
 app = Flask(__name__)
 
+@app.before_request
+def before_request():
+    print(f"request received: {request.method} {request.path}")
+@app.after_request
+def after_request(response):
+    response = response.json()
+    response["custom header"] = "FlaskRocks"
+    return response
+@app.teardown_request
+def teardown_request(exception):
+    print("Exception during request: {exception}")
 
 @app.route("/")
 def route1():
@@ -34,8 +45,8 @@ def calculate():
         elif operation == "divide":
             result = num1 / num2
         else:
-            return "Invalid operation"
-        return {"Result" : result, "Operation" : operation}
+            return {"Result" : "Undefined", "Status": "Error" }
+        return {"Result" : result, "Status" : "Success"}
     except Exception as e:
     # Log the exception and return an error response
         print(f"Error occurred: {e}")
